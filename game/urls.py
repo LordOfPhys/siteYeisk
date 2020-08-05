@@ -21,9 +21,5 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'index/', views.index, name = 'index'),
-    url(r'take_numbers/', views.take_numbers, name = 'numbrs'),
-    url(r'^login/$', views.log, name = 'login'),
-    url(r'^logout/$', views.logout_view, name = 'logout'),
-    url(r'^registration/$', views.register, name = 'register'),
-    url(r'^(?P<room_name>[^/]+)/$', views.room, name='room'),
+    url(r'room/$', views.room, name = 'room'),
 ]

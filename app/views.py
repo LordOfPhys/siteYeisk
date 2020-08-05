@@ -1,37 +1,35 @@
 #- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.http import HttpResponse
-from django.shortcuts import render, redirect, render_to_response
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.template import RequestContext
 from django.contrib import auth
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
-from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
-from django.contrib.auth import authenticate, login, logout
-from django.utils.safestring import mark_safe
-import random
-import json
+from django.contrib.auth import authenticate, login
+from django.utils import timezone
+from app.models import Order
 
 @csrf_exempt
 def index(request):
-    context = RequestContext(request)
     context_dict = {}
-    return render_to_response('game/index.html', context_dict, context)
-
+    if request.method == 'POST':
+        keys = list(request.POST.keys())
+        date = str(timezone.now()).split(" ")[0]
+        time = str(timezone.now()).split(" ")[1].split(".")[0]
+        order = ""
+        i = 0
+        while i < len(keys) - 2:
+            order += request.POST[keys[i]] + " " + request.POST[keys[i + 1]] + "\n"
+            i += 2
+        Order.objects.create(phone = request.POST['phone'], adress = request.POST['adress'], time = date + " " + time, order = order)
+        return render(request, 'game/spasibo.html', context_dict)
+    return render(request, 'game/main.html', context_dict)
 
 @csrf_exempt
-def take_numbers(request):
-    a = random.randint(1, 6)
-    b = random.randint(1, 6)
-    data = {'length': a, 'height': b, 'success': True}
-    print(data)
-    return HttpResponse(json.dumps(data))
+def room(request):
+    context_dict = {}
+    return render(request, 'game/room.html', context_dict)
 
 @csrf_exempt
 def log(request):
-    context = RequestContext(request)
     if request.method == 'POST':
         a = request.POST['login']
         b = request.POST['password']
@@ -42,34 +40,14 @@ def log(request):
                 return redirect('../index')
             else:
                 context_dict = {'boldmessage': "Данный аккаунт неактивен"}
-                return render_to_response('game/login.html', context_dict, context)
+                return render(request, 'game/login.html', context_dict)
         else:
             context_dict = {'boldmessage': "Неверный логин или пароль"}
-            return render_to_response('game/login.html', context_dict, context)
+            return render(request, 'game/login.html', context_dict)
     context_dict = {'boldmessage': ""}
-    return render_to_response('game/login.html', context_dict, context)
+    return render(request, 'game/login.html', context_dict)
 
 @csrf_exempt
 def logout_view(request):
     auth.logout(request)
-    return render(request,'game/index.html')
-
-@csrf_exempt
-def register(request):
-    if request.method == 'POST':
-        a = request.POST['login']
-        b = request.POST['password']
-        c = request.POST['email']
-        user = User.objects.create_user(a, c, b)
-        user.is_active=True
-        user.save()
-        return redirect('../index')
-    context = RequestContext(request)
-    context_dict = {}
-    return render_to_response('game/registration.html', context_dict, context)
-
-@csrf_exempt
-def room(request, room_name):
-    return render(request, 'game/room/html', {
-                  'room_name_json': mark_safe(json.dumps(room_name))
-                  })
+    return render(request,'game/spasibo.html')

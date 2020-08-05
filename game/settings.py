@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -79,7 +78,6 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = 'game.routing.application'
 WSGI_APPLICATION = 'game.wsgi.application'
 
 
